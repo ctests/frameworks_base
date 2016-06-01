@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.statusbar;
+
+import com.android.systemui.navigation.NavigationController;
+import com.android.systemui.navigation.NavigationController.NavbarOverlayResources;
+import com.android.internal.utils.du.DUActionUtils;
 
 import android.animation.TimeInterpolator;
 import android.app.ActivityManager;
@@ -30,8 +34,6 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
-
-import com.android.systemui.R;
 
 public class BarTransitions {
     private static final boolean DEBUG = false;
@@ -66,8 +68,21 @@ public class BarTransitions {
         }
     }
 
+    /*
+     * This is only called when navbar overlay changes and does not impact Statusbar transitions
+     */
+    public void updateResources(NavbarOverlayResources res) {
+        mBarBackground.updateResources(res);
+    }
+
     public int getMode() {
         return mMode;
+    }
+
+    public void setWarningColor(int color) {
+        if (mBarBackground != null) {
+            mBarBackground.setWarningColor(color);
+        }
     }
 
     public void transitionTo(int mode, boolean animate) {
@@ -145,13 +160,29 @@ public class BarTransitions {
                 mTransparent = 0x2f0000ff;
                 mWarning = 0xffff0000;
             } else {
-                mOpaque = context.getColor(R.color.system_bar_background_opaque);
-                mSemiTransparent = context.getColor(R.color.system_bar_background_semi_transparent);
-                mTransparent = context.getColor(R.color.system_bar_background_transparent);
-                mWarning = context.getColor(com.android.internal.R.color.battery_saver_mode_color);
+                mOpaque = DUActionUtils.getColor(context, "system_bar_background_opaque", DUActionUtils.PACKAGE_SYSTEMUI);
+                mSemiTransparent = DUActionUtils.getColor(context, "system_bar_background_semi_transparent", DUActionUtils.PACKAGE_SYSTEMUI);
+                mTransparent = res.getColor(transparentColorResourceId);
+                mWarning = res.getColor(warningColorResourceId);
             }
             mGradient = context.getDrawable(gradientResourceId);
             mInterpolator = new LinearInterpolator();
+        }
+
+        /*
+         * This is only called when navbar overlay changes and does not impact Statusbar transitions
+         */
+        public void updateResources(NavbarOverlayResources res) {
+            mOpaque = res.mOpaque;
+            mSemiTransparent = res.mSemiTransparent;
+            mTransparent = res.mTransparent;
+            mWarning = res.mWarning;
+            // Retrieve the current bounds for mGradient so they can be set to
+            // the new drawable being loaded, otherwise the bounds will be (0, 0, 0, 0)
+            // and the gradient will not be drawn.
+            //
+            // NOTE: NavbarOverlayResources handles setting fresh bounds
+            mGradient = res.mGradient;
         }
 
         @Override
@@ -168,6 +199,12 @@ public class BarTransitions {
         protected void onBoundsChange(Rect bounds) {
             super.onBoundsChange(bounds);
             mGradient.setBounds(bounds);
+        }
+
+        public void setWarningColor(int color) {
+            if (!DEBUG_COLORS) {
+                mWarning = color;
+            }
         }
 
         public void applyModeBackground(int oldMode, int newMode, boolean animate) {
