@@ -162,27 +162,9 @@ public class BarTransitions {
             } else {
                 mOpaque = DUActionUtils.getColor(context, "system_bar_background_opaque", DUActionUtils.PACKAGE_SYSTEMUI);
                 mSemiTransparent = DUActionUtils.getColor(context, "system_bar_background_semi_transparent", DUActionUtils.PACKAGE_SYSTEMUI);
-                mTransparent = res.getColor(transparentColorResourceId);
-                mWarning = res.getColor(warningColorResourceId);
             }
             mGradient = context.getDrawable(gradientResourceId);
             mInterpolator = new LinearInterpolator();
-        }
-
-        /*
-         * This is only called when navbar overlay changes and does not impact Statusbar transitions
-         */
-        public void updateResources(NavbarOverlayResources res) {
-            mOpaque = res.mOpaque;
-            mSemiTransparent = res.mSemiTransparent;
-            mTransparent = res.mTransparent;
-            mWarning = res.mWarning;
-            // Retrieve the current bounds for mGradient so they can be set to
-            // the new drawable being loaded, otherwise the bounds will be (0, 0, 0, 0)
-            // and the gradient will not be drawn.
-            //
-            // NOTE: NavbarOverlayResources handles setting fresh bounds
-            mGradient = res.mGradient;
         }
 
         @Override
@@ -199,12 +181,6 @@ public class BarTransitions {
         protected void onBoundsChange(Rect bounds) {
             super.onBoundsChange(bounds);
             mGradient.setBounds(bounds);
-        }
-
-        public void setWarningColor(int color) {
-            if (!DEBUG_COLORS) {
-                mWarning = color;
-            }
         }
 
         public void applyModeBackground(int oldMode, int newMode, boolean animate) {

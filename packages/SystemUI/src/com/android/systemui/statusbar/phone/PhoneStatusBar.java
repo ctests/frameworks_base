@@ -591,15 +591,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     || uri.equals(Settings.System.getUriFor(
                     Settings.System.RECENT_CARD_TEXT_COLOR))) {
                 rebuildRecentsScreen();
-             } else if (uri.equals(Settings.System.getUriFor(
-                    Settings.System.PULSE_CUSTOM_DIMEN))) {
-		    mNavigationController.updateNavbarOverlay(getNavbarThemedResources());
-		    } else if (uri.equals(Settings.System.getUriFor(
-                Settings.System.NAVBAR_TINT_SWITCH))) {
-   	        mNavigationController.updateNavbarOverlay(getNavbarThemedResources());
-	        } else if (uri.equals(Settings.System.getUriFor(
-                Settings.System.NAVBAR_BUTTON_COLOR))) {
-   	        mNavigationController.updateNavbarOverlay(getNavbarThemedResources());
             }
 	    update();
 	}
@@ -880,12 +871,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mScrimSrcModeEnabled = mContext.getResources().getBoolean(
                 R.bool.config_status_bar_scrim_behind_use_src);
 
-        // let's move it here and get it fired up nice and early and far away from statusbar recreation
-        if (mNavigationController == null) {
-            mNavigationController = new NavigationController(mContext, getNavbarThemedResources(), this, mAddNavigationBar,
-                    mRemoveNavigationBar);
-        }
-
         super.start(); // calls createAndAddWindows()
 
         mMediaSessionManager
@@ -968,9 +953,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mPackageMonitor.register(mContext, mHandler);
         mPackageMonitor.addListener(mNavigationController);
 
-        PanelHolder holder = (PanelHolder) mStatusBarWindowContent.findViewById(R.id.panel_holder);
-        mStatusBarView.setPanelHolder(holder);
-
         mNotificationPanel = (NotificationPanelView) mStatusBarWindow.findViewById(
                 R.id.notification_panel);
         mNotificationPanel.setStatusBar(this);
@@ -997,16 +979,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         try {
             boolean showNav = mWindowManagerService.hasNavigationBar();
             if (DEBUG) Log.v(TAG, "hasNavigationBar=" + showNav);
-            if (showNav && !mRecreating) {
-                mNavigationBarView = mNavigationController.getNavigationBarView(mContext);
                 mNavigationBarView.setDisabledFlags(mDisabled1);
             }
         } catch (RemoteException ex) {
             // no window manager? good luck with that
-        }
-
-        if (!mRecreating) {
-            addAppCircleSidebar();
         }
 
         mAssistManager = new AssistManager(this, context);

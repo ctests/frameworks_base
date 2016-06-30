@@ -243,17 +243,6 @@ public class NavigationBarView extends BaseNavigationBar {
         mBackAltLandIcon = mBackAltIcon;
         mRecentIcon = res.getDrawable(R.drawable.ic_sysbar_recent);
         mRecentLandIcon = mRecentIcon;
-
-    @Override
-    public void updateNavbarThemedResources(Resources res) {
-        getIcons(getResources());
-        mBarTransitions.updateResources(getResources());
-        for (int i = 0; i < mRotatedViews.length; i++) {
-            ViewGroup container = (ViewGroup) mRotatedViews[i];
-            if (container != null) {
-                updateLightsOutResources(container);
-            }
-        }
     }
 
     @Override
